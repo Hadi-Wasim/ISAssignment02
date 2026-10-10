@@ -1,0 +1,17 @@
+{
+  "name": "novabank-security-demo",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "vuln": "node server.js vulnerable",
+    "safe": "node server.js safe"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "express-session": "^1.18.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
