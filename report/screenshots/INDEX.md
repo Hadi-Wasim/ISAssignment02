@@ -2,8 +2,8 @@
 
 Full-screen captures taken on the Windows 11 desktop (the taskbar and system
 clock are visible in every shot). The web captures are live runs of NovaBank in a
-real browser; the red banner = `vulnerable` mode, the green banner = `safe` mode.
-Each row maps a file to its figure in `../IS-Assignment-Report.docx`.
+real browser; the plain pages show `mode: vulnerable` or `mode: safe` on the top
+line. Each row maps a file to its figure in `../IS-Assignment-Report.docx`.
 
 ## Part 1 — buffer overflow
 
