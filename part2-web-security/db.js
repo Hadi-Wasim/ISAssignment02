@@ -10,8 +10,8 @@ db.exec(`
 `);
 
 const users = [
-  ['alice', 'Password123!', 'Alice Morgan'],
-  ['bob', 'hunter2', 'Bob Chen'],
+  ['hadi', '1234', 'hadi wasim'],
+  ['abc', 'xyz', 'abc'],
   ['admin', 'S3cr3t-Admin!', 'System Admin'],
 ];
 const balances = [5230.75, 812.40, 99999.00];
