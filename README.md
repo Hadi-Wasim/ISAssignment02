@@ -1,63 +1,53 @@
-# Information Security Project — Submission
+# Part 2 - Web Application Security (NovaBank)
 
-Offensive & defensive security coursework in three parts. **Educational use only**
-— every component targets code/environments you run and own locally.
+A small banking web app (Node.js + Express + SQLite) with two modes selected at
+start-up. Same code, one flag:
 
-## Contents
+    npm install
+    npm run vuln    # vulnerabilities ON  -> http://localhost:3000
+    npm run safe    # defenses ON         -> http://localhost:3000
 
-| Folder | Part | What it is |
-|--------|------|------------|
-| [`part1-buffer-overflow/`](part1-buffer-overflow/) | Q1 (30) | Stack buffer-overflow exploit (`stack.c`, `exploit.c`) + analysis & stack diagram |
-| [`part2-web-security/`](part2-web-security/) | Q2 (100) | NovaBank: one full-stack app, two modes (vulnerable vs safe) — XSS, CSRF, SQLi + fixes |
-| [`report/`](report/) | All 3 | The report (`IS-Assignment-Report.docx`) + evidence screenshots |
+Demo accounts: alice/Password123!, bob/hunter2, admin/S3cr3t-Admin!
 
-## Final submission (per the brief)
+## Files
 
-1. **One Word report** covering all 3 parts → [`report/IS-Assignment-Report.docx`](report/IS-Assignment-Report.docx)
-   (20 pages, all screenshots embedded).
-2. **One ZIP** containing Q1 + Q2 source → [`IS-submission-Q1-Q2.zip`](IS-submission-Q1-Q2.zip).
-3. **GitHub** (Part 2) → push `part2-web-security/` with its README.
+- server.js  - all routes and the vulnerable/safe logic
+- db.js      - in-memory SQLite database + seed data
+- config.js  - picks vulnerable or safe mode
+- public/dom-xss.js    - client script for the DOM XSS demo
+- public/csrf-demo.html - malicious page for the CSRF demo
 
-**Evidence** → [`report/screenshots/`](report/screenshots/): 20 full-screen captures
-(taskbar + clock visible) across both modes, plus text logs. See
-[`report/screenshots/INDEX.md`](report/screenshots/INDEX.md) for the file→figure map.
+## Functionalities (each works in vuln mode, is blocked in safe mode)
 
-## Quick start
+1. Reflected XSS - GET /search?q=
+   Payload: `<img src=x onerror=alert('Reflected-XSS')>`
+   Vuln: the term is put into the HTML without encoding. Fix: output-encode it.
 
-**Part 1 — buffer overflow (Linux / WSL):**
-```bash
-cd part1-buffer-overflow
-sudo sysctl -w kernel.randomize_va_space=0
-gcc -g -fno-stack-protector -z execstack -no-pie -o stack stack.c
-gcc -o exploit exploit.c && ./exploit && ./stack     # overflow -> root shell
-```
+2. Stored XSS - POST /support (shown on GET /support)
+   Payload: `<script>alert('Stored-XSS')</script>`
+   Vuln: the saved message is rendered raw. Fix: encode on output.
 
-**Part 2 (Windows / macOS / Linux, Node ≥ 22):**
-```bash
-cd part2-web-security
-npm install
-npm run vuln     # vulnerabilities ON  -> http://localhost:3000
-npm run safe     # defenses ON         -> http://localhost:3000
-```
+3. DOM XSS - GET /profile#...  (public/dom-xss.js)
+   Payload: `/profile#<img src=x onerror=alert('DOM-XSS')>`
+   Vuln: the URL fragment is written with innerHTML. Fix: use textContent.
 
-## Build the submission ZIP (Q1 + Q2, no node_modules)
+4. CSRF - POST /transfer
+   Attack: while logged in, open /csrf-demo.html (auto-submits a $500 transfer).
+   Vuln: no anti-CSRF token is checked. Fix: require a per-session _csrf token
+   (and SameSite=Strict cookie).
 
-PowerShell (Windows):
-```powershell
-# from C:\IS02
-$tmp = "submission"
-New-Item -ItemType Directory -Force $tmp | Out-Null
-Copy-Item -Recurse -Force part1-buffer-overflow "$tmp\part1-buffer-overflow"
-Copy-Item -Recurse -Force part2-web-security "$tmp\part2-web-security"
-Remove-Item -Recurse -Force "$tmp\part2-web-security\node_modules" -ErrorAction SilentlyContinue
-Compress-Archive -Path "$tmp\*" -DestinationPath "IS-submission-Q1-Q2.zip" -Force
-Remove-Item -Recurse -Force $tmp
-```
+5. SQL injection - easy (login bypass) - POST /login
+   Payload (username): `' OR '1'='1' -- `   password: anything
+   Vuln: input is concatenated into the query. Fix: parameterized query + input
+   validation.
 
-## Safety / scope
+6. SQL injection - intermediate (blind boolean) - GET /api/check-user?u=
+   Payload: `admin' AND substr(password,1,1)='S'-- ` returns exists:true/false,
+   leaking the password one character at a time. Fix: parameterized query.
 
-* Part 1's exploit only affects a program you compile yourself in an isolated VM/WSL
-  with protections disabled; it has no effect on any other system.
-* Part 2's `vulnerable` mode is intentionally insecure — run it on `localhost` only,
-  never on a public/shared network.
-* Part 3 is run only against the course-provided lab you control.
+7. SQL injection - advanced (UNION) - GET /search?q=
+   List tables: `x%' UNION SELECT 1,name,3 FROM sqlite_master WHERE type='table'-- `
+   Dump creds: `x%' UNION SELECT id, username||':'||password, 0 FROM users-- `
+   Fix: parameterized LIKE, so the payload is only data.
+
+For educational use on localhost only.

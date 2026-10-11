@@ -13,3 +13,8 @@ npm-debug.log*
 # not part of the published submission
 tasks.pdf
 IS-submission-Q1-Q2.zip
+
+# only part 2 (web security) is submitted; rest ignored
+part1-buffer-overflow/
+part3-redteam/
+report/
